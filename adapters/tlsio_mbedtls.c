@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#define USE_MBED_TLS
 // DEPRECATED: the USE_MBED_TLS #define is deprecated.
 #ifdef USE_MBED_TLS
 
@@ -34,6 +35,7 @@
 #include "azure_c_shared_utility/tlsio_mbedtls.h"
 #include "azure_c_shared_utility/socketio.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #define OPTION_UNDERLYING_IO_OPTIONS        "underlying_io_options"
 
@@ -332,7 +334,7 @@ static void mbedtls_init(void *instance, const char *host) {
     // DEPRECATED: debug functions do not belong in the tree.
 #if defined (MBED_TLS_DEBUG_ENABLE)
     mbedtls_ssl_conf_dbg(&result->config, mbedtls_debug, stdout);
-    mbedtls_debug_set_threshold(1);
+    //mbedtls_debug_set_threshold(1);
 #endif
 
     mbedtls_ssl_setup(&result->ssl, &result->config);
@@ -608,7 +610,7 @@ static void* tlsio_mbedtls_CloneOption(const char* name, const void* value)
         {
             result = (void*)value;
         }
-        else if (strcmp(name, "TrustedCerts") == 0)
+        else if (strcmp(name, OPTION_TRUSTED_CERT) == 0)
         {
             if (mallocAndStrcpy_s((char**)&result, value) != 0)
             {
@@ -639,7 +641,7 @@ static void tlsio_mbedtls_DestroyOption(const char* name, const void* value)
     }
     else
     {
-        if (strcmp(name, "TrustedCerts") == 0)
+        if (strcmp(name, OPTION_TRUSTED_CERT) == 0)
         {
             free((void*)value);
         }
@@ -685,7 +687,7 @@ OPTIONHANDLER_HANDLE tlsio_mbedtls_retrieveoptions(CONCRETE_IO_HANDLE handle)
                 result = NULL;
             }
             else if (tls_io_instance->trusted_certificates != NULL &&
-                OptionHandler_AddOption(result, "TrustedCerts", tls_io_instance->trusted_certificates) != OPTIONHANDLER_OK)
+                OptionHandler_AddOption(result, OPTION_TRUSTED_CERT, tls_io_instance->trusted_certificates) != OPTIONHANDLER_OK)
             {
                 LogError("unable to save TrustedCerts option");
                 OptionHandler_Destroy(result);
@@ -713,7 +715,7 @@ int tlsio_mbedtls_setoption(CONCRETE_IO_HANDLE tls_io, const char* optionName, c
     {
         TLS_IO_INSTANCE* tls_io_instance = (TLS_IO_INSTANCE*)tls_io;
 
-        if (strcmp("TrustedCerts", optionName) == 0)
+        if (strcmp(OPTION_TRUSTED_CERT, optionName) == 0)
         {
             if (tls_io_instance->trusted_certificates != NULL)
             {
