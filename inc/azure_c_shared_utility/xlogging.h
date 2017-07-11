@@ -92,17 +92,20 @@ On the other hand, vsprintf does not support the pinned 'format' and os_printf d
 so we compacted the log in the macro LogInfo.
 */
 #define LOG(log_category, log_options, FORMAT, ...) { \
-        const char* __localFORMAT = PSTR(FORMAT); \
-        os_printf(__localFORMAT, ##__VA_ARGS__); \
-        os_printf("\r\n"); \
+char tmp[256]; \
+az_c_strncpy_P(tmp, PSTR(FORMAT), 256); \
+os_printf(tmp, ##__VA_ARGS__); \
+os_printf("\r\n"); \
 }
-
+    
 #define LogInfo(FORMAT, ...) { \
-        const char* __localFORMAT = PSTR(FORMAT); \
-        os_printf(__localFORMAT, ##__VA_ARGS__); \
-        os_printf("\r\n"); \
+char tmp[256]; \
+az_c_strncpy_P(tmp, PSTR(FORMAT), 256); \
+os_printf(tmp, ##__VA_ARGS__); \
+os_printf("\r\n"); \
 }
 #define LogError LogInfo
+    
 
 #else /* !ARDUINO_ARCH_ESP8266 */
 
